@@ -11,9 +11,9 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Austin Number-Sequence Alert"/>
   <Description DefaultValue="Shows a non-blocking banner as soon as a watched number sequence appears in drafts to @austintexas.gov."/>
-  <IconUrl DefaultValue="https://YOUR-HOST/icons/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://YOUR-HOST/icons/icon-80.png" />
-  <SupportUrl DefaultValue="https://YOUR-HOST/" />
+  <IconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-80.png" />
+  <SupportUrl DefaultValue="https://misterweird0.github.io/ContractParts/" />
 
   <AppDomains>
     <AppDomain>YOUR-HOST</AppDomain>
@@ -80,14 +80,14 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16" DefaultValue="https://YOUR-HOST/icons/icon-16.png"/>
-        <bt:Image id="Icon.32" DefaultValue="https://YOUR-HOST/icons/icon-32.png"/>
-        <bt:Image id="Icon.80" DefaultValue="https://YOUR-HOST/icons/icon-80.png"/>
+        <bt:Image id="Icon.16" DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-80.png"/>
       </bt:Images>
 
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://YOUR-HOST/taskpane.html"/>
-        <bt:Url id="Taskpane.Url"  DefaultValue="https://YOUR-HOST/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://misterweird0.github.io/ContractParts/taskpane.html"/>
+        <bt:Url id="Taskpane.Url"  DefaultValue="https://misterweird0.github.io/ContractParts/taskpane.html"/>
       </bt:Urls>
 
       <bt:ShortStrings>
@@ -100,4 +100,5 @@
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
+
 </OfficeApp>

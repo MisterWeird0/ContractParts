@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Austin Number-Sequence Alert</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://appsforoffice.microsoft.com; script-src 'self' https://appsforoffice.microsoft.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:;">
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 10px; }
+    .muted { color: #666; font-size: 12px; }
+    .ok { color: #107c10; }
+  </style>
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js</script>
+</head>
+<body>
+  <h3>Number-Sequence Alert (Austin)</h3>
+  <div class="muted">Keep this pane <b>pinned</b>. Alerts appear as a banner above your draft when matched.</div>
+  <div id="status" class="muted" style="margin-top:8px;"></div>
+
+  <script>
+  (function () {
+    const DOMAIN = "@austintexas.gov";                      // only monitor if any recipient matches this domain
+    const NOTIF_KEY = "numseq_alert";                       // notification ID used in Outlook banner
+    const POLL_MS = 800;                                    // body polling interval (ms)
+
+    // --- WATCH LIST ----------------------------------------------------------
+    // IMPORTANT:
+    // 1) I included every token you pasted verbatim, plus a best-guess split of the final concatenated codes.
+    // 2) If some of these aren't intended, simply delete them from the list below.
+    // 3) Matching is case-insensitive and avoids partial numeric matches.
+
+    const WATCH_RAW = [
+      // Verbatim tokens (whitespace-separated as provided). If any look merged, see the split list below too.
+      "1006221","10011898","104571311","175044","119651411965151196517123769112377001319432138652314528",
+      "878-0001","1661756","1661758","1662692","1714460","1840523","1858580","2129283","2224993","2915859","2756431","3545970",
+      "2242510","2494651","29260284","HA131406668","242-1130","42-7195","46-4835","362216651-2437-0001",
+      "53-4470","59-0655","59-0817","59-0905","60-1148-0003","60-1161-0001","60-7563","63-0322","63-0806","63-1161","63-1667","63-1695",
+      "63-1843-0001","63-1844-0002","63-1845-0003","63-3050-0005","61-5118-0022","63-4705-0002","63-4712-0002","63-4740-0001","63-4915","64-7524",
+      // The final run looked concatenated; here are likely intended separate codes (keep/remove as needed):
+      "H0019","HR990","FCA100-V15","FCA100-V20","FCA851-V15","FCA851-V20","FCA100","FCA851","FRC","FCA512M15TW",
+      // Also include the entire concatenated tail exactly as typed (coverage if you actually paste it like that)
+      "H0019HR990FCA100-V15FCA100-V20FCA851-V15FCA851-V20FCA100FCA851FRCFCA512M15TW"
+    ];
+
+    // Build regexes once. For purely digits / digits-with-hyphens, avoid partial numeric matches:
+    function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function asPattern(token){
+      const hasLetter = /[A-Za-z]/.test(token);
+      const esc = escapeRegex(token);
+      return hasLetter
+        ? new RegExp(`(?<![A-Za-z0-9])${esc}(?![A-Za-z0-9])`, 'i')   // alphanumeric code
+        : new RegExp(`(?<!\\d)${esc}(?!\\d)`, 'i');                   // numeric/hyphen code
+    }
+    const WATCH = WATCH_RAW.filter(Boolean).map(asPattern);
+    // ------------------------------------------------------------------------
+
+    let pollId = null;
+    let monitoring = false;
+
+    Office.onReady(async () => {
+      const item = Office.context.mailbox.item;
+      setStatus("Initializing…");
+
+      // Update watch whenever recipients change (Mailbox 1.7+), and now:
+      const updateWatch = async () => {
+        const hitsAustin = await hasAustinRecipient(item);
+        monitoring = !!hitsAustin;
+        setStatus(hitsAustin
+          ? `Monitoring body (recipients include ${DOMAIN})…`
+          : `Idle (no ${DOMAIN} recipients)`);
+        if (hitsAustin && !pollId) {
+          pollId = setInterval(() => scanBody(item), POLL_MS);
+        } else if (!hitsAustin && pollId) {
+          clearInterval(pollId); pollId = null; clearAlert(item);
+        }
+      };
+
+      if (item.addHandlerAsync) {
+        item.addHandlerAsync(Office.EventType.RecipientsChanged, updateWatch); // RecipientsChanged hook
+      }
+      updateWatch(); // initial check
+    });
+
+    function setStatus(txt){ document.getElementById('status').textContent = txt; }
+
+    function getAllRecipients(item){
+      return Promise.all([item.to, item.cc, item.bcc].map(recips =>
+        new Promise(resolve => recips.getAsync(r => resolve(r.value || [])))
+      )).then(([to,cc,bcc]) => [...to,...cc,...bcc]);
+    }
+
+    async function hasAustinRecipient(item){
+      const recips = await getAllRecipients(item);
+      return recips.some(r => (r.emailAddress||"").toLowerCase().endsWith(DOMAIN));
+    }
+
+    function scanBody(item){
+      if (!monitoring) return;
+      item.body.getAsync(Office.CoercionType.Text, res => {           // compose body
+        if (res.status !== Office.AsyncResultStatus.Succeeded) return;
+        const txt = res.value || "";
+        const matched = WATCH.find(rx => rx.test(txt));
+        if (matched) {
+          showAlert(item, `Heads‑up: detected “${matched}” in a draft addressed to ${DOMAIN}.`);
+        } else {
+          clearAlert(item);
+        }
+      });
+    }
+
+    function showAlert(item, message){
+      item.notificationMessages.replaceAsync(NOTIF_KEY, {             // non-blocking banner
+        type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
+        message,
+        icon: "icon-16",   // optional if you add a 16px icon to resources, not required for banner
+        persistent: true   // stay visible until content no longer matches
+      }, () => {});
+    }
+    function clearAlert(item){
+      item.notificationMessages.removeAsync(NOTIF_KEY, () => {});
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -11,12 +11,13 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Austin Number-Sequence Alert"/>
   <Description DefaultValue="Shows a non-blocking banner as soon as a watched number sequence appears in drafts to @austintexas.gov."/>
-  <IconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-80.png" />
-  <SupportUrl DefaultValue="https://misterweird0.github.io/ContractParts/" />
+  <IconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://misterweird0.github.io/ContractParts/icons/icon-80.png"/>
+  <SupportUrl DefaultValue="https://misterweird0.github.io/ContractParts/"/>
 
+  <!-- IMPORTANT: real domains only -->
   <AppDomains>
-    <AppDomain>YOUR-HOST</AppDomain>
+    <AppDomain>https://misterweird0.github.io</AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -25,7 +26,6 @@
 
   <Requirements>
     <Sets>
-      <!-- Modern Outlook supports newer sets; 1.10 comfortably includes compose events & pinning. -->
       <Set Name="Mailbox" MinVersion="1.10"/>
     </Sets>
   </Requirements>
@@ -33,7 +33,6 @@
   <Permissions>ReadWriteItem</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
-    <!-- Activate on message compose -->
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
 
@@ -61,13 +60,12 @@
                     <Description resid="Button.Description"/>
                   </Supertip>
                   <Icon>
-                    <bt:Image size="16" resid="Icon.16" />
-                    <bt:Image size="32" resid="Icon.32" />
-                    <bt:Image size="80" resid="Icon.80" />
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
                     <SourceLocation resid="Taskpane.Url"/>
-                    <!-- Enables the push-pin so the pane stays open while composing -->
                     <SupportsPinning>true</SupportsPinning>
                   </Action>
                 </Control>
@@ -100,5 +98,4 @@
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
-
 </OfficeApp>
